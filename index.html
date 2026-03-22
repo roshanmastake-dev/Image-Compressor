@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Honor Image Solutions — Image Tools</title>
+<meta name="description" content="Resize, compress and crop images. Free, instant, private.">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#ffffff;
+  --bg:#f5f5f7;
+  --bg2:#fbfbfd;
+  --text:#1d1d1f;
+  --sub:#6e6e73;
+  --hint:#aeaeb2;
+  --border:rgba(0,0,0,.08);
+  --border2:rgba(0,0,0,.14);
+  --accent:#0071e3;
+  --accent-h:#0077ed;
+  --green:#34c759;
+  --red:#ff3b30;
+  --blue:#0071e3;
+  --r:18px;
+  --rsm:12px;
+  --rmd:14px;
+}
+
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  background:var(--bg2);color:var(--text);min-height:100vh;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:300;
+  background:rgba(255,255,255,0.85);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--border);
+  height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;
+}
+.logo{
+  font-size:.9rem;font-weight:700;letter-spacing:-.02em;
+  color:var(--text);text-decoration:none;display:flex;align-items:center;gap:10px;line-height:1.2;
+}
+.logo-mark{
+  width:32px;height:32px;flex-shrink:0;
+  background:linear-gradient(135deg,#0071e3 0%,#5b8fff 100%);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 10px rgba(0,113,227,.3);
+}
+.logo-mark svg{width:16px;height:16px;fill:#fff}
+.nav-r{display:flex;align-items:center;gap:8px}
+.nav-count{font-size:.8rem;color:var(--hint)}
+.nav-btn{
+  padding:6px 16px;border-radius:980px;
+  font-family:inherit;font-size:.8rem;font-weight:500;
+  cursor:pointer;border:none;transition:all .2s cubic-bezier(.4,0,.2,1);
+  display:inline-flex;align-items:center;gap:5px;
+}
+.nav-btn.ghost{background:rgba(0,0,0,.06);color:var(--text)}
+.nav-btn.ghost:hover{background:rgba(0,0,0,.1)}
+.nav-btn.primary{background:var(--accent);color:#fff}
+.nav-btn.primary:hover{background:var(--accent-h)}
+.nav-btn:disabled{opacity:.35;pointer-events:none}
+
+/* ── PAGE ── */
+.page{max-width:780px;margin:0 auto;padding:0 20px 100px}
+
+/* ── HERO ── */
+.hero{padding:72px 0 48px;text-align:center}
+.hero-label{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,113,227,.08);border-radius:980px;
+  padding:4px 12px;margin-bottom:18px;
+  font-size:.75rem;font-weight:500;color:var(--accent);letter-spacing:.01em;
+}
+.hero-label-dot{width:6px;height:6px;background:var(--accent);border-radius:50%}
+.hero h1{
+  font-size:clamp(2.4rem,6vw,3.5rem);font-weight:700;
+  letter-spacing:-.04em;line-height:1.05;
+  color:var(--text);margin-bottom:14px;
+}
+.hero h1 span{color:var(--accent)}
+.hero p{
+  font-size:1.05rem;color:var(--sub);line-height:1.65;
+  max-width:440px;margin:0 auto 40px;font-weight:400;letter-spacing:-.01em;
+}
+
+/* drop zone */
+.dropzone{
+  background:var(--white);border-radius:24px;
+  border:2px dashed rgba(0,0,0,.12);
+  padding:56px 32px;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);
+  text-align:center;
+  box-shadow:0 2px 20px rgba(0,0,0,.04);
+}
+.dropzone:hover,.dropzone.over{
+  border-color:var(--accent);
+  box-shadow:0 0 0 4px rgba(0,113,227,.08),0 2px 20px rgba(0,0,0,.06);
+}
+.dz-icon{
+  width:56px;height:56px;background:var(--bg);border-radius:16px;
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.dropzone:hover .dz-icon{transform:scale(1.1) translateY(-2px)}
+.dz-icon svg{width:26px;height:26px;opacity:.5}
+.dropzone h2{font-size:1.15rem;font-weight:600;letter-spacing:-.02em;color:var(--text);margin-bottom:6px}
+.dropzone p{font-size:.85rem;color:var(--sub);margin-bottom:24px;line-height:1.5}
+.btn-choose{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--accent);color:#fff;
+  padding:10px 24px;border-radius:980px;
+  font-family:inherit;font-size:.875rem;font-weight:500;
+  border:none;cursor:pointer;
+  transition:all .2s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 2px 8px rgba(0,113,227,.3);
+}
+.btn-choose:hover{background:var(--accent-h);box-shadow:0 4px 12px rgba(0,113,227,.35);transform:translateY(-1px)}
+.dz-note{font-size:.73rem;color:var(--hint);margin-top:14px;line-height:1.5}
+
+/* ── TOOL AREA ── */
+#toolArea{display:none}
+
+/* ── IMAGE STRIP ── */
+.img-strip{
+  background:var(--white);border-radius:var(--r);
+  border:1px solid var(--border);
+  box-shadow:0 2px 20px rgba(0,0,0,.05);
+  overflow:hidden;margin-top:32px;
+}
+.strip-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+}
+.strip-title{font-size:.8rem;font-weight:600;letter-spacing:-.01em;color:var(--text)}
+.strip-sub{font-size:.72rem;color:var(--hint);margin-top:1px}
+.strip-actions{display:flex;gap:6px}
+.strip-btn{
+  padding:5px 12px;border-radius:980px;border:1px solid var(--border2);
+  background:transparent;font-family:inherit;font-size:.73rem;font-weight:500;
+  color:var(--sub);cursor:pointer;transition:all .15s;
+}
+.strip-btn:hover{background:var(--bg);border-color:var(--border2);color:var(--text)}
+.strip-btn.danger:hover{color:var(--red);border-color:rgba(255,59,48,.3);background:rgba(255,59,48,.05)}
+
+.thumb-scroll{display:flex;flex-wrap:wrap;gap:10px;padding:16px 18px}
+
+/* thumb card */
+.tc{
+  width:140px;border-radius:var(--rmd);overflow:hidden;
+  background:var(--bg);border:1px solid var(--border);
+  transition:all .2s cubic-bezier(.4,0,.2,1);position:relative;flex-shrink:0;cursor:default;
+}
+.tc:hover{box-shadow:0 8px 24px rgba(0,0,0,.1);transform:translateY(-1px);border-color:var(--border2)}
+.tc.is-cropped{border-color:rgba(52,199,89,.4)}
+.tc.is-done{border-color:rgba(0,113,227,.35)}
+.tc-img{height:90px;display:flex;align-items:center;justify-content:center;background:var(--bg);overflow:hidden;position:relative}
+.tc-img img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+/* hover overlay */
+.tc-hover{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,.38);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  opacity:0;transition:opacity .18s;
+  border-radius:0;
+}
+.tc:hover .tc-hover{opacity:1}
+.tc-act{
+  width:32px;height:32px;border-radius:980px;border:none;cursor:pointer;
+  background:rgba(255,255,255,.95);color:var(--text);
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+  transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.15);
+}
+.tc-act:hover{background:#fff;transform:scale(1.05)}
+.tc-act.crop-btn:hover{color:var(--accent)}
+.tc-act.del-btn:hover{color:var(--red)}
+
+.tc-badge{
+  position:absolute;top:6px;left:6px;
+  padding:2px 7px;border-radius:980px;
+  font-size:.58rem;font-weight:600;letter-spacing:.02em;text-transform:uppercase;
+  display:none;
+}
+.tc-badge.crop{background:rgba(52,199,89,.9);color:#fff}
+.tc-badge.done{background:rgba(0,113,227,.9);color:#fff}
+
+.tc-info{padding:8px 10px 9px}
+.tc-name{font-size:.68rem;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.tc-dims{display:flex;align-items:center;gap:4px;font-size:.62rem;color:var(--sub)}
+.dchip{
+  background:rgba(0,0,0,.05);border-radius:4px;
+  padding:1px 5px;white-space:nowrap;
+}
+.dchip.out{background:rgba(0,113,227,.1);color:var(--blue)}
+.darr{color:var(--hint);font-size:.6rem}
+
+/* add card */
+.add-tc{
+  width:140px;height:140px;border-radius:var(--rmd);
+  border:1px dashed rgba(0,0,0,.16);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;cursor:pointer;color:var(--hint);transition:all .18s;flex-shrink:0;font-size:.73rem;
+}
+.add-tc:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,113,227,.04)}
+.add-tc .plus{font-size:1.6rem;line-height:1;font-weight:300}
+
+/* scroll hint */
+.scroll-hint{
+  text-align:center;padding:20px 0 28px;
+  font-size:.72rem;color:var(--hint);letter-spacing:.05em;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+}
+.scroll-hint::before,.scroll-hint::after{
+  content:'';flex:1;height:1px;background:rgba(0,0,0,.08);
+}
+
+/* ── SETTINGS CARDS ── */
+.settings-stack{display:flex;flex-direction:column;gap:12px}
+
+.card{
+  background:var(--white);border-radius:var(--r);
+  border:1px solid var(--border);
+  box-shadow:0 1px 12px rgba(0,0,0,.04);
+  overflow:hidden;
+}
+.card-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px;cursor:pointer;user-select:none;
+  transition:background .15s;
+}
+.card-hd:hover{background:rgba(0,0,0,.015)}
+.card-hd-l{display:flex;align-items:center;gap:14px}
+.card-ic{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.ic-blue{background:rgba(0,113,227,.1)}
+.ic-blue svg{color:var(--blue)}
+.ic-green{background:rgba(52,199,89,.1)}
+.ic-green svg{color:var(--green)}
+.card-name{font-size:.95rem;font-weight:600;letter-spacing:-.02em;color:var(--text)}
+.card-desc{font-size:.75rem;color:var(--hint);margin-top:2px;letter-spacing:-.005em}
+.card-chev{
+  width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.06);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  transition:transform .22s cubic-bezier(.4,0,.2,1),background .15s;
+}
+.card-chev svg{width:10px;height:10px;opacity:.5;transition:transform .22s}
+.card-hd:not(.closed) .card-chev svg{transform:rotate(90deg)}
+.card-hd.closed .card-chev svg{transform:rotate(0)}
+
+.card-body{padding:0 22px 22px}
+.card-divider{height:1px;background:var(--border);margin-bottom:20px}
+
+/* ── FORM ── */
+.seg{
+  display:inline-flex;background:rgba(0,0,0,.06);border-radius:980px;
+  padding:3px;gap:2px;margin-bottom:20px;
+}
+.sb{
+  padding:6px 16px;border:none;background:transparent;border-radius:980px;
+  font-family:inherit;font-size:.78rem;font-weight:500;color:var(--sub);
+  cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.sb.on{background:var(--white);color:var(--text);box-shadow:0 1px 6px rgba(0,0,0,.12)}
+
+.row2{display:grid;grid-template-columns:1fr 36px 1fr;align-items:end;gap:8px;margin-bottom:14px}
+.row2>.ig{margin:0}
+.ig{margin-bottom:14px}
+.ig:last-child{margin-bottom:0}
+.lbl{
+  font-size:.72rem;font-weight:500;color:var(--sub);
+  display:block;margin-bottom:6px;letter-spacing:.01em;
+}
+.field{
+  width:100%;
+  padding:10px 13px;
+  background:var(--bg);
+  border:1.5px solid rgba(0,0,0,.1);border-radius:var(--rsm);
+  font-family:inherit;font-size:.9rem;color:var(--text);
+  transition:border-color .18s,box-shadow .18s;
+}
+.field:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(0,113,227,.12);
+  background:#fff;
+}
+.field::placeholder{color:var(--hint)}
+select.field{
+  cursor:pointer;-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23aeaeb2' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;
+}
+
+.lock-btn{
+  width:36px;height:42px;
+  border:1.5px solid rgba(0,0,0,.1);border-radius:var(--rsm);
+  background:var(--bg);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;transition:all .18s;flex-shrink:0;margin-bottom:1px;
+}
+.lock-btn.on{background:rgba(0,113,227,.1);border-color:rgba(0,113,227,.3)}
+
+.ck{
+  display:flex;align-items:center;gap:8px;
+  font-size:.82rem;color:var(--sub);cursor:pointer;margin-bottom:14px;
+}
+.ck input{
+  width:16px;height:16px;accent-color:var(--accent);
+  cursor:pointer;border-radius:4px;
+}
+
+/* inline unit inside input */
+.input-unit-wrap{position:relative;display:flex;align-items:center}
+.field-unit{padding-right:46px}
+.unit-inline{
+  position:absolute;right:0;top:0;bottom:0;width:44px;
+  border:none;border-left:1.5px solid rgba(0,0,0,.08);
+  background:rgba(0,0,0,.03);border-radius:0 var(--rsm) var(--rsm) 0;
+  font-family:inherit;font-size:.72rem;font-weight:500;color:var(--sub);
+  cursor:pointer;-webkit-appearance:none;appearance:none;
+  text-align:center;padding:0;transition:background .15s;
+}
+.unit-inline:focus{outline:none;background:rgba(0,113,227,.07)}
+.unit-label{
+  position:absolute;right:12px;font-size:.72rem;
+  font-weight:500;color:var(--hint);pointer-events:none;
+}
+
+/* background fill — optional toggle */
+.bg-toggle{
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:9px 13px;border-radius:10px;
+  border:1.5px solid rgba(0,0,0,.07);background:var(--bg);
+  font-family:inherit;font-size:.78rem;font-weight:500;color:var(--sub);
+  cursor:pointer;transition:all .18s;
+}
+.bg-toggle:hover{border-color:rgba(0,0,0,.14);color:var(--text)}
+.bg-toggle-hint{font-size:.7rem;font-weight:400;color:var(--hint)}
+.bg-options{display:flex;gap:7px;flex-wrap:wrap}
+.bg-opt{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 12px;border-radius:9px;
+  border:1.5px solid rgba(0,0,0,.09);background:var(--white);
+  font-family:inherit;font-size:.76rem;font-weight:500;color:var(--sub);
+  cursor:pointer;transition:all .16s;
+}
+.bg-opt:hover{border-color:rgba(0,0,0,.18);color:var(--text)}
+.bg-opt.on{border-color:var(--accent);color:var(--accent);background:rgba(0,113,227,.05)}
+.bg-swatch{width:16px;height:16px;border-radius:4px;flex-shrink:0;display:block}
+.bg-checker{
+  background-image:linear-gradient(45deg,#ccc 25%,transparent 25%),
+    linear-gradient(-45deg,#ccc 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#ccc 75%),
+    linear-gradient(-45deg,transparent 75%,#ccc 75%);
+  background-size:6px 6px;background-position:0 0,0 3px,3px -3px,-3px 0;
+  background-color:#fff;border:1px solid rgba(0,0,0,.1);
+}
+
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:6px}
+.pc{
+  background:var(--bg);border:1.5px solid rgba(0,0,0,.07);
+  border-radius:var(--rmd);padding:11px 12px;cursor:pointer;
+  transition:all .18s cubic-bezier(.4,0,.2,1);
+}
+.pc:hover{background:rgba(0,113,227,.06);border-color:rgba(0,113,227,.25);transform:translateY(-1px)}
+.pc.on{background:rgba(0,113,227,.1);border-color:rgba(0,113,227,.4)}
+.pc .pn{font-size:.78rem;font-weight:600;color:var(--text);display:block;margin-bottom:3px;letter-spacing:-.01em}
+.pc .pd{font-size:.67rem;color:var(--sub)}
+.pc.on .pn,.pc.on .pd{color:var(--blue)}
+
+.hint{font-size:.72rem;color:var(--hint);margin-top:4px;line-height:1.55;letter-spacing:.005em}
+
+.divider-line{height:1px;background:rgba(0,0,0,.06);margin:18px 0}
+
+.bg-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.bgp{
+  padding:5px 12px;border-radius:980px;
+  border:1.5px solid rgba(0,0,0,.1);
+  background:transparent;color:var(--sub);font-family:inherit;font-size:.73rem;font-weight:500;
+  cursor:pointer;transition:all .15s;
+}
+.bgp:hover{border-color:var(--text);color:var(--text)}
+
+.trow{display:flex;gap:8px}
+.trow .field:first-child{flex:1}
+.trow select.field{flex:0 0 72px}
+
+/* ── EXPORT ── */
+.export-surface{
+  background:var(--text);border-radius:var(--r);
+  padding:28px;margin-top:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.18);
+}
+.export-surface h2{
+  font-size:1.2rem;font-weight:700;letter-spacing:-.03em;
+  color:#fff;margin-bottom:6px;
+}
+.export-surface p{font-size:.8rem;color:rgba(255,255,255,.5);margin-bottom:22px;line-height:1.5;letter-spacing:-.005em}
+.exp-btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:14px 24px;border-radius:14px;
+  background:var(--accent);color:#fff;
+  font-family:inherit;font-size:.9rem;font-weight:600;letter-spacing:-.01em;
+  border:none;cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,113,227,.4);
+  transition:all .2s cubic-bezier(.4,0,.2,1);
+}
+.exp-btn:hover{background:var(--accent-h);box-shadow:0 6px 20px rgba(0,113,227,.45);transform:translateY(-1px)}
+.exp-btn:disabled{opacity:.3;pointer-events:none;transform:none}
+.reset-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;padding:10px;border-radius:10px;margin-top:8px;
+  background:transparent;border:none;
+  color:rgba(255,255,255,.35);font-family:inherit;font-size:.78rem;cursor:pointer;transition:color .15s;
+}
+.reset-btn:hover{color:rgba(255,255,255,.7)}
+
+/* ── CROP MODAL ── */
+.overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+}
+.overlay.h{display:none}
+.modal{
+  background:rgba(255,255,255,.97);
+  border:1px solid rgba(0,0,0,.1);border-radius:22px;
+  width:100%;max-width:720px;max-height:94vh;
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 40px 120px rgba(0,0,0,.22);
+  animation:mpop .22s cubic-bezier(.34,1.18,.64,1);
+}
+@keyframes mpop{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
+
+.mhd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.mhd-l{display:flex;align-items:center;gap:10px}
+.mhd h3{font-size:.9rem;font-weight:600;letter-spacing:-.02em;color:var(--text)}
+.mx{
+  width:28px;height:28px;border-radius:50%;border:none;
+  background:rgba(0,0,0,.08);color:var(--sub);cursor:pointer;
+  font-size:14px;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;font-weight:300;
+}
+.mx:hover{background:rgba(0,0,0,.14);color:var(--text)}
+
+.mbd{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+.mbd::-webkit-scrollbar{width:4px}
+.mbd::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:10px}
+
+.ratio-bar{display:flex;flex-wrap:wrap;gap:5px}
+.rb{
+  padding:6px 14px;border-radius:980px;
+  border:1.5px solid rgba(0,0,0,.1);
+  background:transparent;font-family:inherit;font-size:.75rem;font-weight:500;
+  color:var(--sub);cursor:pointer;transition:all .16s;
+}
+.rb:hover{border-color:var(--accent);color:var(--accent)}
+.rb.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(0,113,227,.3)}
+
+/* canvas */
+.crop-wrap{
+  border-radius:14px;overflow:hidden;background:#1c1c1e;
+  line-height:0;position:relative;
+}
+#cropCanvas{
+  display:block;width:100%;height:auto;max-height:420px;
+  cursor:crosshair;touch-action:none;
+  user-select:none;-webkit-user-select:none;
+}
+
+/* crop info */
+.crop-info{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--bg);border-radius:10px;
+  font-size:.73rem;color:var(--sub);
+}
+.crop-info strong{color:var(--text);font-weight:500}
+.ci-ratio{
+  background:rgba(0,113,227,.1);border-radius:6px;
+  padding:2px 8px;font-size:.7rem;font-weight:500;color:var(--blue);
+}
+
+.crop-inputs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.crop-inputs .ig{margin:0}
+
+.mft{
+  display:flex;gap:8px;padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0;
+}
+.mft .cancel{
+  flex:1;padding:11px;border-radius:980px;
+  border:1.5px solid rgba(0,0,0,.1);background:transparent;
+  color:var(--sub);cursor:pointer;font-family:inherit;font-size:.85rem;font-weight:500;
+  transition:all .15s;
+}
+.mft .cancel:hover{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.16)}
+.mft .apply{
+  flex:2;padding:11px;border-radius:980px;
+  background:var(--accent);color:#fff;border:none;cursor:pointer;
+  font-family:inherit;font-size:.85rem;font-weight:600;
+  box-shadow:0 2px 8px rgba(0,113,227,.3);
+  transition:all .18s;
+}
+.mft .apply:hover{background:var(--accent-h);box-shadow:0 4px 12px rgba(0,113,227,.35)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:rgba(28,28,30,.88);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  color:#fff;padding:9px 20px;border-radius:980px;
+  font-size:.78rem;font-weight:500;
+  opacity:0;transition:all .22s cubic-bezier(.4,0,.2,1);
+  z-index:999;white-space:nowrap;pointer-events:none;
+  box-shadow:0 4px 20px rgba(0,0,0,.2);
+  border:1px solid rgba(255,255,255,.1);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── MOBILE ── */
+@media(max-width:580px){
+  .page{padding:0 14px 80px}
+  nav{padding:0 14px}
+  .hero{padding:48px 0 32px}
+  .hero h1{font-size:2.1rem}
+  .tc,.add-tc{width:calc(50% - 5px)}
+  .presets{grid-template-columns:1fr 1fr}
+  .crop-inputs{grid-template-columns:1fr 1fr}
+  nav .nav-btn.ghost{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="/">
+    <div class="logo-mark">
+      <svg viewBox="0 0 20 20"><path d="M10 2L2 6.5V13.5L10 18L18 13.5V6.5L10 2Z"/><circle cx="10" cy="10" r="3" fill="rgba(255,255,255,0.3)"/></svg>
+    </div>
+    <div style="display:flex;flex-direction:column;line-height:1.2">
+      <span style="font-size:.85rem;font-weight:700;letter-spacing:-.02em;color:var(--text)">Honor Image</span>
+      <span style="font-size:.6rem;font-weight:500;color:var(--hint);letter-spacing:.03em;text-transform:uppercase">Solutions</span>
+    </div>
+  </a>
+  <div class="nav-r">
+    <span class="nav-count" id="navCount"></span>
+    <button class="nav-btn ghost" id="navAdd" style="display:none" onclick="fi.click()">Add Images</button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero" id="heroZone">
+
+    <h1>Image<br><span>Compress.</span></h1>
+    <p>Professional image editing, entirely in your browser. Your files never leave your device.</p>
+
+    <div class="dropzone" id="dz" onclick="fi.click()">
+      <div class="dz-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+      </div>
+      <h2>Drop images here</h2>
+      <p>JPG, PNG, WEBP, GIF — up to 20 MB each</p>
+      <button class="btn-choose" onclick="event.stopPropagation();fi.click()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Choose Files
+      </button>
+
+    </div>
+  </div>
+
+  <!-- TOOL AREA -->
+  <div id="toolArea">
+
+    <!-- IMAGE STRIP -->
+    <div class="img-strip">
+      <div class="strip-top">
+        <div>
+          <div class="strip-title" id="stripLabel">Images</div>
+          <div class="strip-sub">Hover to crop or remove</div>
+        </div>
+        <div class="strip-actions">
+          <button class="strip-btn" onclick="fi.click()">+ Add more</button>
+          <button class="strip-btn danger" onclick="clearAll()">Clear all</button>
+        </div>
+      </div>
+      <div class="thumb-scroll" id="thumbRow"></div>
+    </div>
+
+    <div class="scroll-hint">Adjust settings below</div>
+
+    <div class="settings-stack">
+
+      <!-- CARD: RESIZE -->
+      <div class="card" id="sec-resize">
+        <div class="card-hd" onclick="toggleCard(this)">
+          <div class="card-hd-l">
+            <div class="card-ic ic-blue">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            </div>
+            <div>
+              <div class="card-name">Resize</div>
+              <div class="card-desc">Set exact dimensions or choose a preset</div>
+            </div>
+          </div>
+          <div class="card-chev">
+            <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2l4 3-4 3"/></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-divider"></div>
+
+          <!-- MODE TABS -->
+          <div class="seg">
+            <button class="sb on" onclick="setMode('size',this)">By Pixel</button>
+            <button class="sb" onclick="setMode('pct',this)">By Percent</button>
+            <button class="sb" onclick="setMode('social',this)">Presets</button>
+          </div>
+
+          <!-- BY PIXEL -->
+          <div id="sPanel">
+            <div style="display:flex;align-items:flex-end;gap:8px;margin-bottom:12px">
+              <!-- Width -->
+              <div style="flex:1">
+                <label class="lbl">Width</label>
+                <div class="input-unit-wrap">
+                  <input class="field field-unit" type="number" id="rW" placeholder="1080" min="1" oninput="onW(this.value)">
+                  <select class="unit-inline" id="unitSel" onchange="setUnitInline(this.value)">
+                    <option value="px">px</option>
+                    <option value="cm">cm</option>
+                    <option value="in">in</option>
+                  </select>
+                </div>
+              </div>
+              <!-- Lock -->
+              <button class="lock-btn on" id="lb" onclick="togLock()" style="margin-bottom:1px" title="Lock aspect ratio">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </button>
+              <!-- Height -->
+              <div style="flex:1">
+                <label class="lbl">Height</label>
+                <div class="input-unit-wrap">
+                  <input class="field field-unit" type="number" id="rH" placeholder="1080" min="1" oninput="onH(this.value)">
+                  <span class="unit-label" id="unitLabel">px</span>
+                </div>
+              </div>
+            </div>
+            <label class="ck"><input type="checkbox" id="ckL" checked onchange="ckSync()"> Lock aspect ratio</label>
+          </div>
+
+          <!-- BY PERCENT -->
+          <div id="pPanel" style="display:none">
+            <div class="ig">
+              <label class="lbl">Scale (%)</label>
+              <input class="field" type="number" id="pV" placeholder="50" value="100" min="1" max="500" oninput="refreshDims()">
+            </div>
+            <div class="hint" id="pPrev">Output: — × — px</div>
+          </div>
+
+          <!-- PRESETS -->
+          <div id="soPanel" style="display:none">
+            <div class="presets">
+              <div class="pc" onclick="preset(413,531,this)"><span class="pn">Passport Photo</span><span class="pd">413 × 531 px</span></div>
+              <div class="pc" onclick="preset(800,800,this)"><span class="pn">WhatsApp DP</span><span class="pd">800 × 800 px</span></div>
+              <div class="pc" onclick="preset(1080,1080,this)"><span class="pn">Instagram Post</span><span class="pd">1080 × 1080 px</span></div>
+              <div class="pc" onclick="preset(1080,1920,this)"><span class="pn">Instagram Story</span><span class="pd">1080 × 1920 px</span></div>
+              <div class="pc" onclick="preset(1584,396,this)"><span class="pn">LinkedIn Cover</span><span class="pd">1584 × 396 px</span></div>
+              <div class="pc" onclick="preset(1500,500,this)"><span class="pn">Twitter Cover</span><span class="pd">1500 × 500 px</span></div>
+              <div class="pc" onclick="preset(1280,720,this)"><span class="pn">HD 720p</span><span class="pd">1280 × 720 px</span></div>
+              <div class="pc" onclick="preset(1920,1080,this)"><span class="pn">Full HD 1080p</span><span class="pd">1920 × 1080 px</span></div>
+            </div>
+          </div>
+
+          <!-- BACKGROUND FILL — optional, hidden by default -->
+          <div style="margin-top:16px">
+            <button class="bg-toggle" id="bgToggle" onclick="toggleBgPanel()">
+              <span style="display:flex;align-items:center;gap:6px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                Background fill
+              </span>
+              <span class="bg-toggle-hint" id="bgHint">White · tap to change</span>
+            </button>
+            <div id="bgPanel" style="display:none;margin-top:10px">
+              <p style="font-size:.72rem;color:var(--hint);margin-bottom:10px;line-height:1.5">Applied only when the output ratio differs from the original image.</p>
+              <div class="bg-options">
+                <button class="bg-opt on" id="bgOptWhite" onclick="selectBgOpt('white',this)">
+                  <span class="bg-swatch" style="background:#fff;border:1.5px solid rgba(0,0,0,.12)"></span>
+                  White
+                </button>
+                <button class="bg-opt" id="bgOptBlack" onclick="selectBgOpt('black',this)">
+                  <span class="bg-swatch" style="background:#000"></span>
+                  Black
+                </button>
+                <button class="bg-opt" id="bgOptTransp" onclick="selectBgOpt('transparent',this)">
+                  <span class="bg-swatch bg-checker"></span>
+                  Transparent
+                </button>
+                <button class="bg-opt" id="bgOptCustom" onclick="document.getElementById('bgC').click()">
+                  <span class="bg-swatch" id="customSwatch" style="background:#ffffff;border:1.5px solid rgba(0,0,0,.12)"></span>
+                  Custom
+                </button>
+                <input type="color" id="bgC" value="#ffffff" style="display:none" oninput="onCustomBg(this.value)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD: COMPRESS -->
+      <div class="card" id="sec-compress">
+        <div class="card-hd" onclick="toggleCard(this)">
+          <div class="card-hd-l">
+            <div class="card-ic ic-green">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <div>
+              <div class="card-name">Compress</div>
+              <div class="card-desc">Target a specific file size in KB or MB</div>
+            </div>
+          </div>
+          <div class="card-chev">
+            <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2l4 3-4 3"/></svg>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-divider"></div>
+          <div class="ig">
+            <label class="lbl">Target file size <span style="font-weight:400;color:var(--hint)">— leave empty for maximum quality</span></label>
+            <div class="trow">
+              <input class="field" type="number" id="tSize" placeholder="e.g.  200" min="1" oninput="refreshDims()">
+              <select class="field" id="tUnit" onchange="refreshDims()">
+                <option value="kb">KB</option>
+                <option value="mb">MB</option>
+              </select>
+            </div>
+            <div class="hint">Best for JPG and WEBP. PNG compression depends on image content.</div>
+          </div>
+          <div class="ig">
+            <label class="lbl">Output format</label>
+            <select class="field" id="saveAs">
+              <option value="original">Same as original</option>
+              <option value="jpg">JPG — ideal for photos, smallest size</option>
+              <option value="png">PNG — lossless, preserves transparency</option>
+              <option value="webp">WEBP — modern format, best compression</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /settings-stack -->
+
+    <!-- EXPORT -->
+    <div class="export-surface">
+      <h2>Export</h2>
+      <p id="expSummary">Configure settings above, then download.</p>
+      <button class="exp-btn" id="expBtn" onclick="runExport()" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Images
+      </button>
+      <button class="reset-btn" onclick="clearAll()">Start over</button>
+    </div>
+
+  </div><!-- /toolArea -->
+</div>
+
+<!-- CROP MODAL -->
+<div class="overlay h" id="cropModal">
+  <div class="modal">
+    <div class="mhd">
+      <div class="mhd-l">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"><polyline points="6 20 4 20 4 4 20 4 20 6"/><rect x="9" y="9" width="13" height="13" rx="1"/></svg>
+        <h3>Crop Image</h3>
+      </div>
+      <button class="mx" onclick="closeModal()">✕</button>
+    </div>
+    <div class="mbd">
+
+      <div>
+        <label class="lbl" style="margin-bottom:8px">Aspect ratio</label>
+        <div class="ratio-bar">
+          <button class="rb on" onclick="setRatio('free',this)">Free</button>
+          <button class="rb" onclick="setRatio('1:1',this)">1:1</button>
+          <button class="rb" onclick="setRatio('4:3',this)">4:3</button>
+          <button class="rb" onclick="setRatio('16:9',this)">16:9</button>
+          <button class="rb" onclick="setRatio('3:4',this)">3:4</button>
+          <button class="rb" onclick="setRatio('35:45',this)">Passport</button>
+          <button class="rb" onclick="setRatio('9:16',this)">9:16</button>
+        </div>
+      </div>
+
+      <div>
+        <label class="lbl" style="margin-bottom:8px">Drag to select crop area</label>
+        <div class="crop-wrap">
+          <canvas id="cropCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="crop-info" id="cropInfo">
+        <span>Selection: <strong id="ciSel">None</strong></span>
+        <span class="ci-ratio" id="ciRatio" style="display:none">—</span>
+      </div>
+
+      <div>
+        <label class="lbl" style="margin-bottom:8px">Fine-tune</label>
+        <div class="crop-inputs">
+          <div class="ig"><label class="lbl">X</label><input class="field" id="cX" type="number" value="0" oninput="fromInputs()"></div>
+          <div class="ig"><label class="lbl">Y</label><input class="field" id="cY" type="number" value="0" oninput="fromInputs()"></div>
+          <div class="ig"><label class="lbl">Width</label><input class="field" id="cW" type="number" oninput="fromInputs()"></div>
+          <div class="ig"><label class="lbl">Height</label><input class="field" id="cH" type="number" oninput="fromInputs()"></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="mft">
+      <button class="cancel" onclick="closeModal()">Cancel</button>
+      <button class="apply" onclick="applyCrop()">Apply Crop</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fi" accept="image/*" multiple style="display:none">
+<canvas id="wc" style="display:none"></canvas>
+<div class="toast" id="toast"></div>
+
+<script>
+const fi=document.getElementById('fi');
+let files=[],cropId=null,resMode='size',locked=true,unit='px';
+let cropRatio='free',bgV='#ffffff',bgTrans=false;
+let isDrag=false,dragStart={x:0,y:0},cRect={x:0,y:0,w:0,h:0};
+let cScale=1,imgW=0,imgH=0,cW=0,cH=0;
+const DPI=96;
+
+// UPLOAD
+fi.onchange=e=>{[...e.target.files].forEach(loadFile);e.target.value=''};
+const dz=document.getElementById('dz');
+['dragover','dragenter'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
+['dragleave','dragend'].forEach(ev=>dz.addEventListener(ev,()=>dz.classList.remove('over')));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');[...e.dataTransfer.files].forEach(f=>{if(f.type.startsWith('image/'))loadFile(f)})});
+
+function loadFile(file){
+  if(!file.type.startsWith('image/')){toast('Not an image: '+file.name);return}
+  const r=new FileReader();
+  r.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const id=Date.now()+'_'+Math.random().toString(36).slice(2,5);
+      files.push({id,name:file.name,img,cropData:null});
+      if(files.length===1){
+        document.getElementById('heroZone').style.display='none';
+        document.getElementById('toolArea').style.display='block';
+        document.getElementById('navAdd').style.display='inline-flex';
+        applyHashIntent();
+      }
+      addThumb(files[files.length-1]);
+      refreshDims();updUI();
+      // auto-open crop if came from #crop link
+      if(window._autoCrop&&files.length===1){
+        window._autoCrop=false;
+        setTimeout(()=>openCrop(files[0].id),600);
+      }
+    };
+    img.src=ev.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+function addThumb(f){
+  const g=document.getElementById('thumbRow');
+  const old=document.getElementById('addCard');if(old)old.remove();
+  const[ow,oh]=getOutDims(f.img,f.cropData);
+  const c=document.createElement('div');
+  c.className='tc';c.id='tc_'+f.id;
+  c.innerHTML=`
+    <div class="tc-img">
+      <img src="${f.img.src}" id="ti_${f.id}" alt="">
+      <div class="tc-hover">
+        <button class="tc-act crop-btn" onclick="event.stopPropagation();openCrop('${f.id}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="6 20 4 20 4 4 20 4 20 6"/><rect x="9" y="9" width="13" height="13" rx="1"/></svg>
+        </button>
+        <button class="tc-act del-btn" onclick="event.stopPropagation();rmFile('${f.id}')">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <span class="tc-badge crop" id="ct_${f.id}">Cropped</span>
+      <span class="tc-badge done" id="db_${f.id}">Exported</span>
+    </div>
+    <div class="tc-info">
+      <div class="tc-name" title="${f.name}">${f.name}</div>
+      <div class="tc-dims">
+        <span class="dchip">${f.img.width}×${f.img.height}</span>
+        <span class="darr">›</span>
+        <span class="dchip out" id="nd_${f.id}">${ow}×${oh}</span>
+      </div>
+    </div>`;
+  g.appendChild(c);
+  const am=document.createElement('div');am.className='add-tc';am.id='addCard';
+  am.onclick=()=>fi.click();
+  am.innerHTML='<span class="plus">＋</span><span>Add more</span>';
+  g.appendChild(am);
+}
+
+function refreshDims(){
+  files.forEach(f=>{
+    const el=document.getElementById('nd_'+f.id);
+    if(el){const[w,h]=getOutDims(f.img,f.cropData);el.textContent=w+'×'+h}
+  });
+  if(files.length){
+    const f=files[0];const p=parseFloat(document.getElementById('pV').value)||100;
+    const sw=f.cropData?f.cropData.w:f.img.width,sh=f.cropData?f.cropData.h:f.img.height;
+    document.getElementById('pPrev').textContent=`Output: ${Math.round(sw*p/100)} × ${Math.round(sh*p/100)} px`;
+    const[w,h]=getOutDims(f.img,f.cropData);
+    const ts=document.getElementById('tSize').value,tu=document.getElementById('tUnit').value;
+    document.getElementById('expSummary').textContent=
+      `${files.length} image${files.length>1?'s':''} · ${w} × ${h} px`+(ts?` · Target ${ts} ${tu.toUpperCase()}`:'');
+  }
+}
+
+function updUI(){
+  const n=files.length;
+  document.getElementById('stripLabel').textContent=n+' image'+(n>1?'s':'')+' loaded';
+  document.getElementById('navCount').textContent=n?n+' file'+(n>1?'s':''):'';
+  document.getElementById('expBtn').disabled=n===0;
+}
+
+function rmFile(id){
+  files=files.filter(f=>f.id!==id);
+  document.getElementById('tc_'+id)?.remove();
+  updUI();refreshDims();
+  if(!files.length)resetHero();
+}
+function clearAll(){files=[];document.getElementById('thumbRow').innerHTML='';resetHero()}
+function resetHero(){
+  document.getElementById('heroZone').style.display='block';
+  document.getElementById('toolArea').style.display='none';
+  document.getElementById('navAdd').style.display='none';
+  updUI();
+}
+
+function toggleCard(hd){
+  const body=hd.nextElementSibling;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  hd.classList.toggle('closed',isOpen);
+}
+
+// RESIZE CONTROLS
+function setMode(m,btn){
+  resMode=m;document.querySelectorAll('.sb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  document.getElementById('sPanel').style.display=m==='size'?'block':'none';
+  document.getElementById('pPanel').style.display=m==='pct'?'block':'none';
+  document.getElementById('soPanel').style.display=m==='social'?'block':'none';
+  refreshDims();
+}
+function togLock(){
+  locked=!locked;
+  document.getElementById('lb').classList.toggle('on',locked);
+  document.getElementById('ckL').checked=locked;
+}
+function ckSync(){locked=document.getElementById('ckL').checked;document.getElementById('lb').classList.toggle('on',locked)}
+function onW(v){
+  if(locked&&files.length){const f=files[0];const sw=f.cropData?f.cropData.w:f.img.width,sh=f.cropData?f.cropData.h:f.img.height;const w=parseInt(v)||0;if(w>0)document.getElementById('rH').value=Math.round(w*(sh/sw))}
+  refreshDims();
+}
+function onH(v){
+  if(locked&&files.length){const f=files[0];const sw=f.cropData?f.cropData.w:f.img.width,sh=f.cropData?f.cropData.h:f.img.height;const h=parseInt(v)||0;if(h>0)document.getElementById('rW').value=Math.round(h*(sw/sh))}
+  refreshDims();
+}
+function setUnitInline(u){
+  unit=u;
+  // sync both width and height labels
+  document.getElementById('unitLabel').textContent=u;
+}
+function toggleBgPanel(){
+  const p=document.getElementById('bgPanel');
+  const open=p.style.display==='block';
+  p.style.display=open?'none':'block';
+}
+function selectBgOpt(type,btn){
+  document.querySelectorAll('.bg-opt').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(type==='white'){setBg('#ffffff');updateBgHint('White')}
+  else if(type==='black'){setBg('#000000');updateBgHint('Black')}
+  else if(type==='transparent'){setBg('transparent');updateBgHint('Transparent')}
+}
+function onCustomBg(val){
+  bgV=val;bgTrans=false;
+  document.getElementById('customSwatch').style.background=val;
+  document.querySelectorAll('.bg-opt').forEach(b=>b.classList.remove('on'));
+  document.getElementById('bgOptCustom').classList.add('on');
+  updateBgHint(val);
+}
+function updateBgHint(label){
+  document.getElementById('bgHint').textContent=label+' · tap to change';
+}
+function preset(w,h,btn){
+  document.querySelectorAll('.pc').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  document.getElementById('rW').value=w;document.getElementById('rH').value=h;
+  locked=false;document.getElementById('lb').classList.remove('on');document.getElementById('ckL').checked=false;
+  refreshDims();
+}
+function setBg(c){bgTrans=c==='transparent';bgV=bgTrans?'#ffffff':c}
+document.getElementById('bgC').oninput=function(){onCustomBg(this.value)}
+
+function getOutDims(img,cropData){
+  const sw=cropData?cropData.w:img.width,sh=cropData?cropData.h:img.height;
+  if(resMode==='size'){
+    let rw=parseInt(document.getElementById('rW').value)||0,rh=parseInt(document.getElementById('rH').value)||0;
+    if(rw||rh){let tw=rw||sw,th=rh||sh;if(unit==='cm'){tw=Math.round(tw*DPI/2.54);th=Math.round(th*DPI/2.54)}if(unit==='in'){tw=Math.round(tw*DPI);th=Math.round(th*DPI)}return[tw,th]}
+    return[sw,sh];
+  }
+  if(resMode==='pct'){const p=parseFloat(document.getElementById('pV').value)||100;return[Math.round(sw*p/100),Math.round(sh*p/100)]}
+  return[parseInt(document.getElementById('rW').value)||sw,parseInt(document.getElementById('rH').value)||sh];
+}
+
+// CROP
+function openCrop(id){
+  cropId=id;const f=files.find(x=>x.id===id);if(!f)return;
+  imgW=f.img.width;imgH=f.img.height;
+  const canvas=document.getElementById('cropCanvas');
+  const wrap=canvas.parentElement;
+  const maxW=Math.min(wrap.clientWidth||660,660);
+  cScale=Math.min(maxW/imgW,440/imgH,1);
+  cW=Math.round(imgW*cScale);cH=Math.round(imgH*cScale);
+  canvas.width=cW;canvas.height=cH;
+  canvas.style.width=cW+'px';canvas.style.height=cH+'px';
+  cRect=f.cropData?{...f.cropData}:{x:0,y:0,w:imgW,h:imgH};
+  drawCrop(f.img);syncInputs();updateInfo();
+  canvas.onmousedown=e=>startDrag(getPos(e,canvas));
+  canvas.onmousemove=e=>{if(isDrag)moveDrag(getPos(e,canvas))};
+  canvas.onmouseup=canvas.onmouseleave=()=>isDrag=false;
+  canvas.ontouchstart=e=>{e.preventDefault();startDrag(getPos(e.touches[0],canvas))};
+  canvas.ontouchmove=e=>{e.preventDefault();if(isDrag)moveDrag(getPos(e.touches[0],canvas))};
+  canvas.ontouchend=()=>isDrag=false;
+  document.getElementById('cropModal').classList.remove('h');
+}
+
+function getPos(e,canvas){
+  const r=canvas.getBoundingClientRect();
+  return{x:(e.clientX-r.left)*(canvas.width/r.width),y:(e.clientY-r.top)*(canvas.height/r.height)};
+}
+
+function startDrag(p){
+  isDrag=true;dragStart={...p};
+  cRect={x:Math.round(p.x/cScale),y:Math.round(p.y/cScale),w:0,h:0};
+}
+
+function moveDrag(p){
+  let dw=p.x-dragStart.x,dh=p.y-dragStart.y;
+  if(cropRatio!=='free'){const[rw,rh]=cropRatio.split(':').map(Number);dh=Math.abs(dw)*(rh/rw)*(dh<0?-1:1)}
+  const x1=Math.min(dragStart.x,dragStart.x+dw),y1=Math.min(dragStart.y,dragStart.y+dh);
+  const x2=Math.max(dragStart.x,dragStart.x+dw),y2=Math.max(dragStart.y,dragStart.y+dh);
+  cRect={
+    x:Math.round(Math.max(0,x1)/cScale),
+    y:Math.round(Math.max(0,y1)/cScale),
+    w:Math.round((Math.min(x2,cW)-Math.max(0,x1))/cScale),
+    h:Math.round((Math.min(y2,cH)-Math.max(0,y1))/cScale)
+  };
+  clamp();
+  const f=files.find(x=>x.id===cropId);if(f)drawCrop(f.img);
+  syncInputs();updateInfo();
+}
+
+function clamp(){
+  cRect.x=Math.max(0,Math.min(cRect.x,imgW-1));cRect.y=Math.max(0,Math.min(cRect.y,imgH-1));
+  cRect.w=Math.max(1,Math.min(cRect.w,imgW-cRect.x));cRect.h=Math.max(1,Math.min(cRect.h,imgH-cRect.y));
+}
+
+function drawCrop(img){
+  const canvas=document.getElementById('cropCanvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.drawImage(img,0,0,W,H);
+
+  const sx=cRect.x*cScale,sy=cRect.y*cScale,sw=cRect.w*cScale,sh=cRect.h*cScale;
+  if(sw<2||sh<2)return;
+
+  // dim outside — 4 rectangles, no clearRect needed
+  ctx.fillStyle='rgba(0,0,0,0.52)';
+  ctx.fillRect(0,0,W,sy);                        // top
+  ctx.fillRect(0,sy+sh,W,H-sy-sh);               // bottom
+  ctx.fillRect(0,sy,sx,sh);                       // left
+  ctx.fillRect(sx+sw,sy,W-sx-sw,sh);              // right
+
+  // re-draw bright selection area
+  ctx.drawImage(img,cRect.x,cRect.y,cRect.w,cRect.h,sx,sy,sw,sh);
+
+  // border
+  ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=1.5;
+  ctx.strokeRect(sx+0.75,sy+0.75,sw-1.5,sh-1.5);
+
+  // accent edge line
+  ctx.strokeStyle='rgba(0,113,227,0.8)';ctx.lineWidth=2;
+  ctx.strokeRect(sx+1,sy+1,sw-2,sh-2);
+
+  // corner handles — L-shaped
+  const hl=12,ht=2.5;
+  ctx.fillStyle='#fff';
+  ctx.shadowColor='rgba(0,0,0,.25)';ctx.shadowBlur=4;
+  const corners=[[sx,sy,1,1],[sx+sw,sy,-1,1],[sx,sy+sh,1,-1],[sx+sw,sy+sh,-1,-1]];
+  corners.forEach(([cx,cy,dx,dy])=>{
+    ctx.fillRect(cx-ht*dx*(dx<0?-1:0),cy+(dy<0?-ht:0),hl*dx,ht*dy);
+    ctx.fillRect(cx+(dx<0?-ht:0),cy-ht*dy*(dy<0?-1:0),ht*dx,hl*dy);
+  });
+  ctx.shadowBlur=0;
+
+  // rule of thirds
+  ctx.strokeStyle='rgba(255,255,255,0.22)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+  [1/3,2/3].forEach(f=>{
+    ctx.beginPath();ctx.moveTo(sx+sw*f,sy);ctx.lineTo(sx+sw*f,sy+sh);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(sx,sy+sh*f);ctx.lineTo(sx+sw,sy+sh*f);ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  // size label
+  if(sw>72&&sh>28){
+    const label=`${cRect.w} × ${cRect.h}`;
+    ctx.font='500 12px -apple-system,BlinkMacSystemFont,sans-serif';
+    const tw=ctx.measureText(label).width;
+    const lx=sx+(sw-tw)/2,ly=sy+sh/2+5;
+    ctx.fillStyle='rgba(0,0,0,.62)';
+    ctx.beginPath();ctx.roundRect(lx-9,ly-15,tw+18,21,5);ctx.fill();
+    ctx.fillStyle='#fff';ctx.fillText(label,lx,ly);
+  }
+}
+
+function syncInputs(){
+  document.getElementById('cX').value=cRect.x;document.getElementById('cY').value=cRect.y;
+  document.getElementById('cW').value=cRect.w;document.getElementById('cH').value=cRect.h;
+}
+function fromInputs(){
+  cRect={x:parseInt(document.getElementById('cX').value)||0,y:parseInt(document.getElementById('cY').value)||0,
+    w:parseInt(document.getElementById('cW').value)||imgW,h:parseInt(document.getElementById('cH').value)||imgH};
+  clamp();const f=files.find(x=>x.id===cropId);if(f)drawCrop(f.img);updateInfo();
+}
+function updateInfo(){
+  const hasRect=cRect.w>1&&cRect.h>1;
+  document.getElementById('ciSel').textContent=hasRect?`${cRect.x}, ${cRect.y}  ·  ${cRect.w} × ${cRect.h} px`:'None';
+  const rat=document.getElementById('ciRatio');
+  if(hasRect){rat.style.display='inline';rat.textContent=(cRect.w/cRect.h).toFixed(2)+' : 1'}
+  else rat.style.display='none';
+}
+function setRatio(r,btn){cropRatio=r;document.querySelectorAll('.rb').forEach(b=>b.classList.remove('on'));btn.classList.add('on')}
+
+function applyCrop(){
+  if(cRect.w<2||cRect.h<2){toast('Draw a selection on the image first');return}
+  const f=files.find(x=>x.id===cropId);if(!f)return;
+  f.cropData={...cRect};
+  const wc=document.getElementById('wc');wc.width=cRect.w;wc.height=cRect.h;
+  wc.getContext('2d').drawImage(f.img,cRect.x,cRect.y,cRect.w,cRect.h,0,0,cRect.w,cRect.h);
+  const ti=document.getElementById('ti_'+f.id);if(ti)ti.src=wc.toDataURL('image/jpeg',.88);
+  document.getElementById('ct_'+f.id).style.display='block';
+  document.getElementById('tc_'+f.id).classList.add('is-cropped');
+  refreshDims();closeModal();toast('Crop applied');
+}
+function closeModal(){document.getElementById('cropModal').classList.add('h');cropId=null;isDrag=false}
+
+// ── EXPORT ──────────────────────────────────────
+// processOne: render a file to dataURL + filename, mark badge
+function processOne(f){
+  const wc=document.getElementById('wc');
+  const src=f.cropData||{x:0,y:0,w:f.img.width,h:f.img.height};
+  const[tw,th]=getOutDims(f.img,f.cropData);
+  wc.width=tw;wc.height=th;
+  const ctx=wc.getContext('2d');
+  if(!bgTrans){ctx.fillStyle=bgV;ctx.fillRect(0,0,tw,th)}else ctx.clearRect(0,0,tw,th);
+  ctx.drawImage(f.img,src.x,src.y,src.w,src.h,0,0,tw,th);
+  const fmt=document.getElementById('saveAs').value;
+  const ext=fmt==='original'?getExt(f.name):fmt;
+  const mime=ext==='png'?'image/png':ext==='webp'?'image/webp':'image/jpeg';
+  const tv=parseFloat(document.getElementById('tSize').value),tu=document.getElementById('tUnit').value;
+  let du;
+  if(tv&&isFinite(tv)&&mime!=='image/png'){
+    // 2% safety margin → result always stays under target
+    const tb=(tu==='mb'?tv*1048576:tv*1024)*0.98;
+    // base64 prefix lengths differ per mime
+    const pfx=mime==='image/webp'?24:23;
+    const byteEst=s=>(s.length-pfx)*0.75;
+    let lo=0.01,hi=1.0,loStr=null;
+    for(let i=0;i<22;i++){
+      const q=(lo+hi)/2;
+      const s=wc.toDataURL(mime,q);
+      if(byteEst(s)<=tb){lo=q;loStr=s;}  // under → save, try higher quality
+      else hi=q;                           // over  → try lower quality
+      if(hi-lo<0.002)break;
+    }
+    // always use last confirmed-under-target render
+    du=loStr||wc.toDataURL(mime,lo);
+  }else{
+    du=wc.toDataURL(mime,.92);
+  }
+  // build filename: compressed_{name}_{actualsize}.ext
+  const pfxLen=mime==='image/webp'?24:23;
+  const rawBytes=Math.round((du.length-pfxLen)*0.75);
+  const sizeTag=rawBytes>=1048576
+    ?(rawBytes/1048576).toFixed(1)+'mb'
+    :Math.round(rawBytes/1024)+'kb';
+  const baseName=f.name.replace(/\.[^.]+$/,'');
+  const fileName='compressed_'+baseName+'_'+sizeTag+'.'+ext;
+  // mark card
+  document.getElementById('db_'+f.id).style.display='block';
+  document.getElementById('tc_'+f.id).classList.add('is-done');
+  return{du,fileName,ext,mime};
+}
+
+async function runExport(){
+  if(!files.length)return;
+  const eb=document.getElementById('expBtn');
+  const btnHTML=eb.innerHTML;
+  eb.textContent='Processing…';eb.disabled=true;
+
+  if(files.length===1){
+    // Single file — direct download, no zip needed
+    const{du,fileName}=processOne(files[0]);
+    triggerDownload(du,fileName);
+    toast('Image downloaded');
+  } else {
+    // Multiple files — pack into ZIP
+    eb.textContent='Zipping…';
+    // load JSZip on demand
+    await loadJSZip();
+    const zip=new JSZip();
+    const usedNames={};
+    for(let i=0;i<files.length;i++){
+      eb.textContent=`Processing ${i+1} / ${files.length}…`;
+      await tick(); // let UI breathe
+      const{du,fileName,mime}=processOne(files[i]);
+      // handle duplicate filenames
+      let fn=fileName;
+      if(usedNames[fn]){usedNames[fn]++;fn=fn.replace(/(\.\w+)$/,`_${usedNames[fn]}$1`);}
+      else usedNames[fn]=1;
+      // dataURL → base64 data only
+      const b64=du.split(',')[1];
+      zip.file(fn,b64,{base64:true});
+    }
+    eb.textContent='Building ZIP…';
+    await tick();
+    const blob=await zip.generateAsync({type:'blob',compression:'STORE'});
+    const url=URL.createObjectURL(blob);
+    triggerDownload(url,'pixelforge_images.zip');
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    toast(`${files.length} images zipped & downloaded`);
+  }
+
+  eb.innerHTML=btnHTML;eb.disabled=false;
+}
+
+function triggerDownload(href,name){
+  const a=document.createElement('a');
+  a.href=href;a.download=name;
+  document.body.appendChild(a);a.click();a.remove();
+}
+
+function tick(){return new Promise(r=>setTimeout(r,30))}
+
+function loadJSZip(){
+  if(window.JSZip)return Promise.resolve();
+  return new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload=resolve;s.onerror=reject;
+    document.head.appendChild(s);
+  });
+}
+
+function getExt(n){const m=n.match(/\.([^.]+)$/);if(!m)return'jpg';const e=m[1].toLowerCase();return e==='png'?'png':e==='webp'?'webp':'jpg'}
+
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// ── HASH NAVIGATION (from homepage cards) ──
+(function(){
+  const h=location.hash.replace('#','');
+  if(!h)return;
+  window._hashIntent=h;
+})();
+
+function applyHashIntent(){
+  const h=window._hashIntent;
+  if(!h)return;
+  window._hashIntent=null;
+  const targets={resize:'sec-resize',compress:'sec-compress'};
+  const secId=targets[h];
+  if(secId){
+    const el=document.getElementById(secId);
+    if(!el)return;
+    setTimeout(()=>{
+      el.scrollIntoView({behavior:'smooth',block:'start'});
+      // pulse highlight
+      el.style.transition='box-shadow .25s';
+      el.style.boxShadow='0 0 0 3px rgba(0,113,227,.5)';
+      setTimeout(()=>el.style.boxShadow='',1800);
+    },350);
+  } else if(h==='crop'){
+    // auto-open crop on first uploaded image
+    window._autoCrop=true;
+  }
+}
+</script>
+
+<style>
+.site-footer{background:#0f0f0f;margin-top:72px;padding:48px 20px 32px;text-align:center}
+.footer-logo-wrap{display:inline-flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:24px}
+.footer-logo-mark{width:36px;height:36px;background:linear-gradient(135deg,#0071e3,#5b8fff);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,113,227,.35);flex-shrink:0}
+.footer-logo-mark svg{width:18px;height:18px;fill:#fff}
+.footer-logo-name{text-align:left;line-height:1.2}
+.footer-logo-name strong{display:block;font-size:.9rem;font-weight:700;letter-spacing:-.02em;color:#fff}
+.footer-logo-name span{font-size:.6rem;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.04em;text-transform:uppercase}
+.footer-links{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 4px;margin-bottom:28px}
+.footer-links a{font-size:.78rem;color:rgba(255,255,255,.45);text-decoration:none;padding:5px 10px;border-radius:6px;transition:all .15s;cursor:pointer;border:none;background:none;font-family:inherit}
+.footer-links a:hover{color:#fff;background:rgba(255,255,255,.07)}
+.footer-sep{color:rgba(255,255,255,.15);font-size:.7rem}
+.footer-copy{font-size:.7rem;color:rgba(255,255,255,.2)}
+
+/* modal */
+.legal-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:900;display:none;align-items:center;justify-content:center;padding:16px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.legal-box{background:#fff;border-radius:18px;width:100%;max-width:540px;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 24px 72px rgba(0,0,0,.22);overflow:hidden}
+.legal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f0f0f0;flex-shrink:0}
+.legal-hd h3{font-size:.9rem;font-weight:700;letter-spacing:-.02em;color:#1d1d1f}
+.legal-cls{width:26px;height:26px;border-radius:50%;border:none;background:#f5f5f7;cursor:pointer;font-size:13px;color:#6e6e73;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.legal-cls:hover{background:#e5e5ea;color:#111}
+.legal-body{padding:20px;overflow-y:auto;font-size:.8rem;color:#444;line-height:1.8}
+.legal-body p{margin-bottom:10px}
+.legal-body strong{color:#1d1d1f}
+.legal-body ul{margin:8px 0 8px 18px;display:flex;flex-direction:column;gap:5px}
+</style>
+
+<footer class="site-footer">
+  <a class="footer-logo-wrap" href="/">
+    <div class="footer-logo-mark">
+      <svg viewBox="0 0 20 20"><path d="M10 2L2 6.5V13.5L10 18L18 13.5V6.5L10 2Z"/><circle cx="10" cy="10" r="3" fill="rgba(255,255,255,0.28)"/></svg>
+    </div>
+    <div class="footer-logo-name">
+      <strong>Honor Image Solutions</strong>
+      <span>Free Image Tools</span>
+    </div>
+  </a>
+
+  <div class="footer-links">
+    <a href="about.html">About Us</a>
+    <span class="footer-sep">·</span>
+    <a href="privacy.html">Privacy Policy</a>
+    <span class="footer-sep">·</span>
+    <a href="terms.html">Terms &amp; Conditions</a>
+    <span class="footer-sep">·</span>
+    <a href="contact.html">Contact</a>
+    <span class="footer-sep">·</span>
+    <a href="disclaimer.html">Disclaimer</a>
+  </div>
+
+  <div class="footer-copy">© 2026 Honor Image Solutions. All rights reserved.</div>
+</footer>
+
+<!-- LEGAL MODAL -->
+<div class="legal-ov" id="legalOv" onclick="if(event.target===this)closeLegal()">
+  <div class="legal-box">
+    <div class="legal-hd">
+      <h3 id="legalTitle"></h3>
+      <button class="legal-cls" onclick="closeLegal()">✕</button>
+    </div>
+    <div class="legal-body" id="legalBody"></div>
+  </div>
+</div>
+
+<script>
+const legalData={
+  about:{title:'About Us',body:`<p><strong>Honor Image Solutions</strong> is a free browser-based image editing platform. We built it because resizing, compressing and cropping images should be instant, private, and free for everyone.</p><p><strong>Our promise:</strong></p><ul><li>Your images never leave your device</li><li>No signup, no watermarks</li><li>Always free</li></ul>`},
+  privacy:{title:'Privacy Policy',body:`<p><em>Last updated: March 2026</em></p><p><strong>No Data Collection</strong><br>All processing happens in your browser. Your files never reach any server.</p><p><strong>No Cookies</strong><br>We only use localStorage to save your theme preference. No tracking cookies.</p><p><strong>No Third-Party Sharing</strong><br>We collect nothing, so we share nothing.</p>`},
+  terms:{title:'Terms & Conditions',body:`<p><em>Last updated: March 2026</em></p><p><strong>Use of Service</strong><br>By using this website you agree to these terms.</p><p><strong>Acceptable Use</strong><br>Do not use this service to process illegal or harmful content. You are responsible for the images you process.</p><p><strong>No Warranties</strong><br>This service is provided "as is" without warranties of any kind.</p><p><strong>Limitation of Liability</strong><br>We are not liable for any loss of data or damages from use of this service.</p>`},
+  contact:{title:'Contact',body:`<p>Have a question, suggestion or feedback? We would love to hear from you.</p><p><strong>Email</strong><br><a href="mailto:roshanmastake1564@gmail.com" style="color:#0071e3">roshanmastake1564@gmail.com</a></p><p>We typically reply within 24–48 hours.</p>`},
+  disclaimer:{title:'Disclaimer',body:`<p>The tools on this site are for general image editing purposes only. Results may vary depending on the original file format and content.</p><p><strong>Image Quality</strong><br>Verify output before using it for official or critical documents.</p><p><strong>No Professional Advice</strong><br>For official documents like passport photos, always verify requirements with the relevant authority.</p>`}
+};
+function openLegal(k){const d=legalData[k];if(!d)return;document.getElementById('legalTitle').textContent=d.title;document.getElementById('legalBody').innerHTML=d.body;document.getElementById('legalOv').style.display='flex';document.body.style.overflow='hidden'}
+function closeLegal(){document.getElementById('legalOv').style.display='none';document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLegal()});
+</script>
+</body>
+</html>
